@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-primary text-white text-center py-4">
+                <h1 class="card-title mb-0">
+                    <i class="fas fa-brain me-2"></i>AI-Powered Resume Analyzer
+                </h1>
+                <p class="mb-0 mt-2">Upload your resume and get instant insights on job fit</p>
+            </div>
+            <div class="card-body p-5">
+                <form action="{{ url_for('main.analyze_resume') }}" method="POST" enctype="multipart/form-data" id="analyzeForm">
+                    <div class="mb-4">
+                        <label for="job_title" class="form-label fw-semibold">
+                            <i class="fas fa-briefcase me-2 text-primary"></i>Job Title
+                        </label>
+                        <input type="text" class="form-control form-control-lg" id="job_title" name="job_title" 
+                               placeholder="e.g., Senior Software Engineer" required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="job_description" class="form-label fw-semibold">
+                            <i class="fas fa-file-text me-2 text-primary"></i>Job Description
+                        </label>
+                        <textarea class="form-control" id="job_description" name="job_description" rows="8" 
+                                  placeholder="Paste the complete job description here..." required></textarea>
+                        <div class="form-text">Include requirements, skills, and responsibilities for better analysis</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="resume" class="form-label fw-semibold">
+                            <i class="fas fa-upload me-2 text-primary"></i>Upload Resume
+                        </label>
+                        <div class="file-upload-wrapper">
+                            <input type="file" class="form-control" id="resume" name="resume" 
+                                   accept=".pdf,.docx,.doc" required>
+                            <div class="file-upload-info">
+                                <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                <p class="mb-2">Drag and drop your resume here or click to browse</p>
+                                <small class="text-muted">Supported formats: PDF, DOCX, DOC (Max: 16MB)</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                            <i class="fas fa-chart-line me-2"></i>Analyze Resume
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="row mt-5">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-search fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">Smart Analysis</h5>
+                        <p class="card-text">Advanced NLP algorithms extract and analyze key skills and keywords from your resume.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-chart-pie fa-3x text-success mb-3"></i>
+                        <h5 class="card-title">Match Scoring</h5>
+                        <p class="card-text">Get precise percentage scores showing how well your resume matches the job requirements.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-lightbulb fa-3x text-warning mb-3"></i>
+                        <h5 class="card-title">Actionable Insights</h5>
+                        <p class="card-text">Receive detailed recommendations to improve your resume for better job prospects.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center py-5">
+                <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h5>Analyzing Your Resume</h5>
+                <p class="text-muted mb-0">This may take a few moments...</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('analyzeForm').addEventListener('submit', function() {
+    // Show loading modal
+    var loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+    loadingModal.show();
+    
+    // Disable submit button
+    var submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Analyzing...';
+});
+
+// File upload enhancements
+document.getElementById('resume').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const fileName = file.name;
+        const fileSize = (file.size / 1024 / 1024).toFixed(2);
+        
+        // Update upload info
+        const uploadInfo = document.querySelector('.file-upload-info');
+        uploadInfo.innerHTML = `
+            <i class="fas fa-file-check fa-2x text-success mb-2"></i>
+            <p class="mb-1 fw-semibold">${fileName}</p>
+            <small class="text-muted">Size: ${fileSize} MB</small>
+        `;
+    }
+});
+</script>
+{% endblock %}

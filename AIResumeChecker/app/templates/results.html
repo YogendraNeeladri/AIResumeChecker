@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis Results - Resume Analyzer{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-lg border-0 mb-4">
+            <div class="card-header bg-success text-white py-3">
+                <h2 class="card-title mb-0">
+                    <i class="fas fa-chart-line me-2"></i>Analysis Complete
+                </h2>
+            </div>
+            <div class="card-body p-4">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-file-alt me-2 text-primary"></i>Resume: {{ analysis.filename }}</h5>
+                    </div>
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-briefcase me-2 text-primary"></i>Position: {{ analysis.job_title }}</h5>
+                    </div>
+                </div>
+                
+                <!-- Score Cards -->
+                <div class="row mb-5">
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card bg-primary text-white h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-star fa-3x mb-3"></i>
+                                <h3 class="card-title">{{ "%.1f"|format(analysis.overall_score) }}%</h3>
+                                <p class="card-text">Overall Match</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card bg-info text-white h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-code fa-3x mb-3"></i>
+                                <h3 class="card-title">{{ "%.1f"|format(analysis.technical_skills_score) }}%</h3>
+                                <p class="card-text">Technical Skills</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card bg-success text-white h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-users fa-3x mb-3"></i>
+                                <h3 class="card-title">{{ "%.1f"|format(analysis.soft_skills_score) }}%</h3>
+                                <p class="card-text">Soft Skills</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card bg-warning text-white h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-search fa-3x mb-3"></i>
+                                <h3 class="card-title">{{ "%.1f"|format(analysis.keyword_match_score) }}%</h3>
+                                <p class="card-text">Keywords</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Matched Skills -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow border-0 h-100">
+            <div class="card-header bg-success text-white">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-check-circle me-2"></i>Matched Skills
+                </h4>
+            </div>
+            <div class="card-body">
+                {% set matched = analysis.get_matched_skills() %}
+                {% if matched.technical %}
+                    <h6 class="text-success"><i class="fas fa-cogs me-2"></i>Technical Skills</h6>
+                    <div class="mb-3">
+                        {% for skill in matched.technical %}
+                            <span class="badge bg-success me-1 mb-1">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                
+                {% if matched.soft %}
+                    <h6 class="text-success"><i class="fas fa-handshake me-2"></i>Soft Skills</h6>
+                    <div class="mb-3">
+                        {% for skill in matched.soft %}
+                            <span class="badge bg-info me-1 mb-1">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                
+                {% if not matched.technical and not matched.soft %}
+                    <p class="text-muted">No direct skill matches found. Consider updating your resume to include more relevant keywords.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Missing Skills -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow border-0 h-100">
+            <div class="card-header bg-warning text-white">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Areas for Improvement
+                </h4>
+            </div>
+            <div class="card-body">
+                {% set missing = analysis.get_missing_skills() %}
+                {% if missing.technical %}
+                    <h6 class="text-warning"><i class="fas fa-wrench me-2"></i>Technical Skills to Add</h6>
+                    <div class="mb-3">
+                        {% for skill in missing.technical %}
+                            <span class="badge bg-warning text-dark me-1 mb-1">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                
+                {% if missing.soft %}
+                    <h6 class="text-warning"><i class="fas fa-heart me-2"></i>Soft Skills to Highlight</h6>
+                    <div class="mb-3">
+                        {% for skill in missing.soft %}
+                            <span class="badge bg-secondary me-1 mb-1">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                
+                {% if not missing.technical and not missing.soft %}
+                    <p class="text-success">Great! Your resume covers all the key skills mentioned in the job description.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow border-0">
+            <div class="card-header bg-primary text-white">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>Recommendations
+                </h4>
+            </div>
+            <div class="card-body">
+                {% set recommendations = analysis.get_recommendations() %}
+                {% if recommendations %}
+                    <ol class="list-group list-group-numbered list-group-flush">
+                        {% for recommendation in recommendations %}
+                            <li class="list-group-item border-0 py-3">
+                                <i class="fas fa-arrow-right text-primary me-2"></i>{{ recommendation }}
+                            </li>
+                        {% endfor %}
+                    </ol>
+                {% else %}
+                    <p class="text-muted">No specific recommendations available.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12 text-center">
+        <a href="{{ url_for('main.download_report', analysis_id=analysis.id) }}" 
+           class="btn btn-success btn-lg me-3">
+            <i class="fas fa-download me-2"></i>Download PDF Report
+        </a>
+        <a href="{{ url_for('main.index') }}" class="btn btn-primary btn-lg">
+            <i class="fas fa-plus me-2"></i>Analyze Another Resume
+        </a>
+    </div>
+</div>
+{% endblock %}
